@@ -3,4 +3,5 @@
   <Project Path="ExperimentPlatformApplication/ExperimentPlatformApplication.csproj" Id="01d9df4f-94fb-4652-99ce-b2cef12a55c6" />
   <Project Path="ExperimentPlatformDomain/ExperimentPlatformDomain.csproj" Id="a93c9272-410c-4d21-aff5-691e8a7c5c7c" />
   <Project Path="ExperimentPlatformInfrastructure/ExperimentPlatformInfrastructure.csproj" Id="d0c76528-8357-4dd6-8d04-8ab383c4ac38" />
+  <Project Path="ExperimentPlatformWorker/ExperimentPlatformWorker.csproj" Id="7f956e03-c2c4-4c9e-90d4-56d698fdad8e" />
 </Solution>
