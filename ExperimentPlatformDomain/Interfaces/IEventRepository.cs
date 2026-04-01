@@ -4,6 +4,8 @@ namespace ExperimentPlatformDomain.Interfaces
 {
     public interface IEventRepository
     {
-        Task Add(Event _event);
+        Task AddAsync(Event evt, CancellationToken ct);
+
+        Task SaveChangesAsync(CancellationToken ct);
     }
 }
