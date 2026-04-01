@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using ExperimentPlatformDomain.Entities;
 
 namespace ExperimentPlatformDomain.Interfaces
 {
-    internal interface IEventRepository
+    public interface IEventRepository
     {
+        Task Add(Event _event);
     }
 }
