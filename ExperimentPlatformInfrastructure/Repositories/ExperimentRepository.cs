@@ -14,7 +14,7 @@ namespace ExperimentPlatformInfrastructure.Repositories
             await _context.Experiments.AddAsync(experiment, ct);
         }
 
-        public async Task<Experiment?> GetByIdAsync(Guid id, CancellationToken ct)
+        public async Task<Experiment?> GetAsync(Guid id, CancellationToken ct)
         {
             return await _context.Experiments
                 .Include(x => x.Variants)

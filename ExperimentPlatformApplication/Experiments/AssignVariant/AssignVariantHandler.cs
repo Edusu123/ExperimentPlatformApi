@@ -7,9 +7,9 @@ namespace ExperimentPlatformApplication.Experiments.AssignVariant
     {
         private readonly IExperimentRepository _repository = repository;
 
-        public async Task<Variant> Handle(AssignVariantCommand command)
+        public async Task<Variant> Handle(AssignVariantCommand command, CancellationToken ct)
         {
-            var experiment = await _repository.Get(command.ExperimentId);
+            var experiment = await _repository.GetAsync(command.ExperimentId, ct);
 
             if (experiment is null || !experiment.IsActive)
                 throw new InvalidOperationException("Experiment not active");
