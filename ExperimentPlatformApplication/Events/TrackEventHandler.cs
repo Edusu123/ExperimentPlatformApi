@@ -1,5 +1,7 @@
-﻿using ExperimentPlatformApplication.Abstractions;
+﻿using Microsoft.Extensions.DependencyInjection;
+using ExperimentPlatformApplication.Abstractions;
 using ExperimentPlatformDomain.Entities;
+using ExperimentPlatformDomain.Interfaces;
 
 namespace ExperimentPlatformApplication.Events
 {
@@ -9,7 +11,7 @@ namespace ExperimentPlatformApplication.Events
 
         public Task Handle(Guid experimentId, string userId, string type)
         {
-            var ev = new Event
+            var evt = new Event
             {
                 Id = Guid.NewGuid(),
                 ExperimentId = experimentId,
@@ -18,7 +20,13 @@ namespace ExperimentPlatformApplication.Events
                 CreatedAt = DateTime.UtcNow
             };
 
-            _queue.Enqueue(ev);
+            _queue.EnqueueAsync(async (sp, ct) =>
+            {
+                var repo = sp.GetRequiredService<IEventRepository>();
+
+                await repo.AddAsync(evt, ct);
+                await repo.SaveChangesAsync(ct);
+            });
 
             return Task.CompletedTask;
         }

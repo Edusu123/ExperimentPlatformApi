@@ -7,7 +7,7 @@ namespace ExperimentPlatformApplication.Experiments.CreateExperiment
     {
         private readonly IExperimentRepository _repository = repository;
 
-        public async Task<Guid> Handle(CreateExperimentCommand command)
+        public async Task<Guid> Handle(CreateExperimentCommand command, CancellationToken ct)
         {
             var experiment = new Experiment
             {
@@ -24,7 +24,7 @@ namespace ExperimentPlatformApplication.Experiments.CreateExperiment
                     .ToList()
             };
 
-            await _repository.Add(experiment);
+            await _repository.AddAsync(experiment, ct);
 
             return experiment.Id;
         }
