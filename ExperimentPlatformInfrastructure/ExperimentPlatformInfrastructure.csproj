@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ExperimentPlatformApplication\ExperimentPlatformApplication.csproj" />
     <ProjectReference Include="..\ExperimentPlatformDomain\ExperimentPlatformDomain.csproj" />
   </ItemGroup>
 
