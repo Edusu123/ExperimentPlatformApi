@@ -2,7 +2,7 @@
 {
     public interface IBackgroundQueue
     {
-        void Enqueue(object workItem);
+        void Enqueue(Func<CancellationToken, Task> workItem);
         Task<object?> DequeueAsync(CancellationToken cancellationToken);
     }
 }
