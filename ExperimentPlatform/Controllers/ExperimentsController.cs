@@ -16,9 +16,12 @@ namespace ExperimentPlatform.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(CreateExperimentResponse), StatusCodes.Status201Created)]
         public async Task<ActionResult<CreateExperimentResponse>> Create(
-            [FromBody] CreateExperimentCommand command,
+            [FromBody] CreateExperimentCommand? command,
             CancellationToken cancellationToken)
         {
+            if (command is null)
+                return BadRequest("Request body is required (JSON with name and variants).");
+
             var id = await _createExperiment.Handle(command, cancellationToken);
             return Created($"/api/experiments/{id}", new CreateExperimentResponse(id));
         }
