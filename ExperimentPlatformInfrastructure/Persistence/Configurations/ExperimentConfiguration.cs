@@ -15,14 +15,13 @@ namespace ExperimentPlatformInfrastructure.Persistence.Configurations
             builder.Property(x => x.Id);
 
             builder.Property(x => x.Name)
-                .IsRequired()
-                .HasMaxLength(200);
+                .IsRequired();
 
             builder.Property(x => x.IsActive);
 
             builder.HasMany(x => x.Variants)
                 .WithOne()
-                .HasForeignKey("experiment_id")
+                .HasForeignKey(nameof(Variant.ExperimentId))
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

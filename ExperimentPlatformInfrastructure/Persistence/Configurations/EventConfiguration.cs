@@ -14,17 +14,11 @@ namespace ExperimentPlatformInfrastructure.Persistence.Configurations
 
             builder.Property(x => x.UserId);
 
-            builder.Property(x => x.ExperimentId)
-                .HasColumnName("experiment_id");
-
-            //builder.Property(x => x.Variant)
-            //    .HasMaxLength(50)
-            //    .HasColumnName("variant");
+            builder.Property(x => x.ExperimentId);
 
             builder.Property(x => x.Type);
 
-            builder.Property(x => x.CreatedAt)
-                .HasColumnName("created_at");
+            builder.Property(x => x.CreatedAt);
 
             builder.HasIndex(x => new { x.ExperimentId, x.UserId });
         }
