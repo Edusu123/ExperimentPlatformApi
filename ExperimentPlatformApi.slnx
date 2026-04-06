@@ -1,4 +1,7 @@
 <Solution>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
   <Project Path="ExperimentPlatform/ExperimentPlatform.csproj" />
   <Project Path="ExperimentPlatformApplication/ExperimentPlatformApplication.csproj" Id="01d9df4f-94fb-4652-99ce-b2cef12a55c6" />
   <Project Path="ExperimentPlatformDomain/ExperimentPlatformDomain.csproj" Id="a93c9272-410c-4d21-aff5-691e8a7c5c7c" />
