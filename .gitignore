@@ -364,3 +364,4 @@ FodyWeavers.xsd
 
 /ExperimentPlatform/appsettings.Development.json
 /ExperimentPlatformInfrastructure/appsettings.Development.json
+/.env
