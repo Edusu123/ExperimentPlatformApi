@@ -25,6 +25,7 @@ namespace ExperimentPlatformApplication.Experiments.CreateExperiment
             };
 
             await _repository.AddAsync(experiment, ct);
+            await _repository.SaveChangesAsync(ct);
 
             return experiment.Id;
         }
