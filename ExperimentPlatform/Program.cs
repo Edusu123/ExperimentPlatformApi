@@ -1,6 +1,7 @@
 using ExperimentPlatform.Extensions;
 using ExperimentPlatformInfrastructure;
 using ExperimentPlatformInfrastructure.Persistence;
+using ExperimentPlatformWorker;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddExperimentPlatformBackgroundWorker();
 
 var app = builder.Build();
 
