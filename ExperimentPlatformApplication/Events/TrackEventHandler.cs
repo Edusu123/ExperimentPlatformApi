@@ -9,7 +9,7 @@ namespace ExperimentPlatformApplication.Events
     {
         private readonly IBackgroundQueue _queue = queue;
 
-        public Task Handle(Guid experimentId, string userId, string type)
+        public async Task Handle(Guid experimentId, string userId, string type)
         {
             var evt = new Event
             {
@@ -20,15 +20,13 @@ namespace ExperimentPlatformApplication.Events
                 CreatedAt = DateTime.UtcNow
             };
 
-            _queue.EnqueueAsync(async (sp, ct) =>
+            await _queue.EnqueueAsync(async (sp, ct) =>
             {
                 var repo = sp.GetRequiredService<IEventRepository>();
 
                 await repo.AddAsync(evt, ct);
                 await repo.SaveChangesAsync(ct);
             });
-
-            return Task.CompletedTask;
         }
     }
 }
