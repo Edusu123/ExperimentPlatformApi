@@ -34,10 +34,12 @@ var queueType = queueSettings.GetQueueType();
 // Register only the selected queue implementation
 if (queueType == QueueType.RabbitMQ)
 {
+    Console.WriteLine("Using RabbitMQ Background Queue");
     builder.Services.AddSingleton<IBackgroundQueue, RabbitMqBackgroundQueue>();
 }
 else
 {
+    Console.WriteLine("Using In-Memory Background Queue");
     builder.Services.AddSingleton<IBackgroundQueue, InMemoryBackgroundQueue>();
 }
 
