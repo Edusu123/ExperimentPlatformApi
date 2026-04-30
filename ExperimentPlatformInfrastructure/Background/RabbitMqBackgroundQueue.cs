@@ -1,4 +1,8 @@
 ﻿using ExperimentPlatformApplication.Abstractions;
+using ExperimentPlatformDomain.Entities;
+using ExperimentPlatformDomain.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -14,11 +18,17 @@ public class RabbitMqBackgroundQueue : IBackgroundQueue, IDisposable
     private readonly IConnection _connection;
     private readonly IChannel _channel;
     private readonly Channel<Func<IServiceProvider, CancellationToken, Task>> _localQueue;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<RabbitMqBackgroundQueue> _logger;
 
-    public RabbitMqBackgroundQueue(IOptions<RabbitMqSettings> settings)
+    public RabbitMqBackgroundQueue(IOptions<RabbitMqSettings> settings, IServiceProvider serviceProvider, ILogger<RabbitMqBackgroundQueue> logger)
     {
         _settings = settings.Value;
+        _serviceProvider = serviceProvider;
+        _logger = logger;
         _localQueue = Channel.CreateUnbounded<Func<IServiceProvider, CancellationToken, Task>>();
+
+        _logger.LogInformation("Initializing RabbitMQ Background Queue with HostName={HostName}, Port={Port}", "rabbitmq", _settings.Port);
 
         // Create connection factory
         var factory = new ConnectionFactory
@@ -58,15 +68,10 @@ public class RabbitMqBackgroundQueue : IBackgroundQueue, IDisposable
         StartConsuming();
     }
 
-    public async ValueTask EnqueueAsync(Func<IServiceProvider, CancellationToken, Task> workItem)
+    public async ValueTask EnqueueAsync(Event evt, Func<IServiceProvider, CancellationToken, Task> workItem)
     {
-        // Serialize the work item metadata (simplified approach)
-        // In production, you'd serialize actual event data
-        var message = JsonSerializer.Serialize(new
-        {
-            Timestamp = DateTime.UtcNow,
-            Type = "EventTracking"
-        });
+        // Serialize the event
+        var message = JsonSerializer.Serialize(evt);
 
         var body = Encoding.UTF8.GetBytes(message);
 
@@ -84,8 +89,7 @@ public class RabbitMqBackgroundQueue : IBackgroundQueue, IDisposable
             body: body
         );
 
-        // Also queue locally for processing
-        await _localQueue.Writer.WriteAsync(workItem);
+        // Note: We don't queue locally when using RabbitMQ because the consumer handles processing
     }
 
     public async ValueTask<Func<IServiceProvider, CancellationToken, Task>> DequeueAsync(CancellationToken ct)
@@ -102,8 +106,37 @@ public class RabbitMqBackgroundQueue : IBackgroundQueue, IDisposable
             var body = ea.Body.ToArray();
             var message = Encoding.UTF8.GetString(body);
 
-            // Process message (acknowledge it)
-            await _channel.BasicAckAsync(deliveryTag: ea.DeliveryTag, multiple: false);
+            try
+            {
+                // Deserialize the event
+                var evt = JsonSerializer.Deserialize<Event>(message);
+
+                if (evt != null)
+                {
+                    _logger.LogInformation("RabbitMQ consumer received event: Id={EventId}, ExperimentId={ExperimentId}, UserId={UserId}", 
+                        evt.Id, evt.ExperimentId, evt.UserId);
+
+                    // Create a new scope and insert the event into the database
+                    using (var scope = _serviceProvider.CreateScope())
+                    {
+                        var repo = scope.ServiceProvider.GetRequiredService<IEventRepository>();
+
+                        await repo.AddAsync(evt, CancellationToken.None);
+                        await repo.SaveChangesAsync(CancellationToken.None);
+
+                        _logger.LogInformation("Event {EventId} saved successfully via RabbitMQ consumer", evt.Id);
+                    }
+                }
+
+                // Acknowledge the message after successful processing
+                await _channel.BasicAckAsync(deliveryTag: ea.DeliveryTag, multiple: false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing RabbitMQ message");
+                // If processing fails, reject the message (could implement retry logic here)
+                await _channel.BasicNackAsync(deliveryTag: ea.DeliveryTag, multiple: false, requeue: true);
+            }
         };
 
         _channel.BasicConsumeAsync(
