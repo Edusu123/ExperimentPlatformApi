@@ -1,4 +1,5 @@
 ﻿using ExperimentPlatformApplication.Abstractions;
+using ExperimentPlatformDomain.Entities;
 using System.Threading.Channels;
 
 namespace ExperimentPlatformInfrastructure.Background
@@ -8,7 +9,7 @@ namespace ExperimentPlatformInfrastructure.Background
         private readonly Channel<Func<IServiceProvider, CancellationToken, Task>> _queue = 
             Channel.CreateUnbounded<Func<IServiceProvider, CancellationToken, Task>>();
 
-        public async ValueTask EnqueueAsync(Func<IServiceProvider, CancellationToken, Task> workItem)
+        public async ValueTask EnqueueAsync(Event evt, Func<IServiceProvider, CancellationToken, Task> workItem)
         {
             await _queue.Writer.WriteAsync(workItem);
         }
